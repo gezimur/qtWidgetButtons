@@ -1,12 +1,9 @@
-#ifndef MAINWIDGET_H
-#define MAINWIDGET_H
+#pragma once
 
-#include "Button.h"
 #include <QWidget>
-#include <QListWidget>
 #include <QGridLayout>
 #include <QPushButton>
-#include <vector>
+#include <QTextEdit>
 
 class MainWidget : public QWidget
 {
@@ -14,22 +11,20 @@ class MainWidget : public QWidget
 
 public:
     MainWidget(QWidget *parent = nullptr);
-    ~MainWidget();
 
 public slots:
-    void addLogRow(QString LogRow);
-    void showOrHideLogs();
+    void addLog(bool bButtonStatus);
 
 private:
-    Button *Washer;
-    Button *Wiper;
-    QPushButton *ShowOrHideLogsButton;
-    QPushButton *DeleteLogsButton;
-    QGridLayout *LayoutWithButtons;
+    void createConnection();
 
-    QListWidget *ListOfLogs;
-    QGridLayout *LayoutWithListOfLogs;
+private:
+    QTextEdit* m_pListOfLogs;
+    QPushButton* m_pWasherButton;
+    QPushButton* m_pWiperButton;
+    QPushButton* m_pDeleteLogsButton;
 
-    QGridLayout *MainLayout;
+    QGridLayout* m_pLogsLayout;
+    QGridLayout* m_pButtonLayout;
+    QGridLayout* m_pMainLayout;
 };
-#endif // MAINWIDGET_H

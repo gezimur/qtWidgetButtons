@@ -1,70 +1,56 @@
-#include "MainWidget.h"
-#include "Button.h"
+
 #include <QPushButton>
 #include <QGridLayout>
+#include <QTextEdit>
 
+#include "MainWidget.h"
 
 MainWidget::MainWidget(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+      m_pListOfLogs(new QTextEdit(this)),
+      m_pWasherButton(new QPushButton("washer", this)),
+      m_pWiperButton(new QPushButton("wiper", this)),
+      m_pDeleteLogsButton(new QPushButton("delete log")),
+
+      m_pLogsLayout(new QGridLayout()),
+      m_pButtonLayout(new QGridLayout()),
+      m_pMainLayout(new QGridLayout())
+
+
 {
+    m_pLogsLayout->addWidget(m_pListOfLogs);
 
-    ListOfLogs = new QListWidget(this);
-    ListOfLogs->hide();
+    m_pWasherButton->setCheckable(true);
+    m_pWiperButton->setCheckable(true);
 
-    LayoutWithListOfLogs = new QGridLayout();
-    LayoutWithListOfLogs->addWidget(ListOfLogs);
+    m_pButtonLayout->addWidget(m_pWasherButton, 0, 0);
+    m_pButtonLayout->addWidget(m_pWiperButton, 0, 1);
+    m_pButtonLayout->addWidget(m_pDeleteLogsButton, 1, 1);
+    m_pButtonLayout->setColumnStretch(2, 1);
 
-    Washer = new Button("washer", this);
-    Washer->setCheckable(true);
-    connect(Washer, SIGNAL(toggled(bool)), Washer, SLOT(createLogsRowAndChangeStatus(bool)));
-    connect(Washer, SIGNAL(logsRowCreated(QString)), this, SLOT(addLogRow(QString)));
+    m_pMainLayout->addLayout(m_pButtonLayout, 0, 0);
+    m_pMainLayout->addLayout(m_pLogsLayout, 1, 0);
+    m_pMainLayout->setRowStretch(1, 1);
 
-    Wiper = new Button("wiper", this);
-    Wiper->setCheckable(true);
-    connect(Wiper, SIGNAL(toggled(bool)), Wiper, SLOT(createLogsRowAndChangeStatus(bool)));
-    connect(Wiper, SIGNAL(logsRowCreated(QString)), this, SLOT(addLogRow(QString)));
+    setLayout(m_pMainLayout);
 
-    DeleteLogsButton = new QPushButton("delete logs", this);
-    connect(DeleteLogsButton, SIGNAL(clicked()), ListOfLogs, SLOT(clear()));
-
-    ShowOrHideLogsButton = new QPushButton("logs", this);
-    connect(ShowOrHideLogsButton, SIGNAL(clicked()), this, SLOT(showOrHideLogs()));
-
-    LayoutWithButtons = new QGridLayout();
-    LayoutWithButtons->addWidget(Washer, 0, 0);
-    LayoutWithButtons->addWidget(Wiper, 0, 1);
-    LayoutWithButtons->addWidget(ShowOrHideLogsButton, 1, 0);
-    LayoutWithButtons->addWidget(DeleteLogsButton, 1, 1);
-
-    MainLayout = new QGridLayout();
-    MainLayout->addLayout(LayoutWithButtons, 0, 0);
-    MainLayout->addLayout(LayoutWithListOfLogs, 0, 1);
-
-    setLayout(MainLayout);
+    createConnection();
 }
 
-MainWidget::~MainWidget()
-{
-    delete Washer;
-    delete Wiper;
-    delete LayoutWithButtons;
+void MainWidget::createConnection(){
+    connect(m_pWasherButton, SIGNAL(toggled(bool)), this, SLOT(addLog(bool)));
+    connect(m_pWiperButton, SIGNAL(toggled(bool)), this, SLOT(addLog(bool)));
 
-    delete ListOfLogs;
-    delete LayoutWithListOfLogs;
-
-    delete MainLayout;
+    connect(m_pDeleteLogsButton, SIGNAL(clicked()), m_pListOfLogs, SLOT(clear()));
 }
 
-void MainWidget::addLogRow(QString LogRow)
+void MainWidget::addLog(bool bButtonStatus)
 {
-    ListOfLogs->addItem(LogRow);
-}
+    QPushButton* pSender = (QPushButton*)sender();
+    if (pSender == m_pWasherButton)
+        m_pListOfLogs->setTextColor(QColor(0,255,0));
+    else if (pSender == m_pWiperButton)
+        m_pListOfLogs->setTextColor(QColor(0,0,255));
 
-void MainWidget::showOrHideLogs()
-{
-    if (ListOfLogs->isHidden()){
-        ListOfLogs->show();
-    }else{
-        ListOfLogs->hide();
-    }
+    m_pListOfLogs->append(pSender->text() + ((bButtonStatus)? " on" : " off") );
 }
