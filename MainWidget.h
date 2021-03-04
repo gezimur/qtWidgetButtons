@@ -5,15 +5,19 @@
 #include <QPushButton>
 #include <QTextEdit>
 
+#include "CommandSender.h"
+
 class MainWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    MainWidget(QWidget *parent = nullptr);
+    MainWidget(CommandSender* pCommandSender, QWidget *parent = nullptr);
 
 public slots:
     void addLog(bool bButtonStatus);
+
+    void sendCommand(bool bButtonStatus);
 
 private:
     void createConnection();
@@ -27,4 +31,6 @@ private:
     QGridLayout* m_pLogsLayout;
     QGridLayout* m_pButtonLayout;
     QGridLayout* m_pMainLayout;
+
+    CommandSender* m_pCommandSender;
 };

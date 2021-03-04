@@ -3,9 +3,11 @@
 #include <QGridLayout>
 #include <QTextEdit>
 
+#include "CommandSender.h"
+
 #include "MainWidget.h"
 
-MainWidget::MainWidget(QWidget *parent)
+MainWidget::MainWidget(CommandSender* pCommandSender, QWidget *parent)
     : QWidget(parent),
       m_pListOfLogs(new QTextEdit(this)),
       m_pWasherButton(new QPushButton("washer", this)),
@@ -14,9 +16,9 @@ MainWidget::MainWidget(QWidget *parent)
 
       m_pLogsLayout(new QGridLayout()),
       m_pButtonLayout(new QGridLayout()),
-      m_pMainLayout(new QGridLayout())
+      m_pMainLayout(new QGridLayout()),
 
-
+      m_pCommandSender(pCommandSender)
 {
     m_pLogsLayout->addWidget(m_pListOfLogs);
 
@@ -37,11 +39,16 @@ MainWidget::MainWidget(QWidget *parent)
     createConnection();
 }
 
-void MainWidget::createConnection(){
+void MainWidget::createConnection()
+{
     connect(m_pWasherButton, SIGNAL(toggled(bool)), this, SLOT(addLog(bool)));
     connect(m_pWiperButton, SIGNAL(toggled(bool)), this, SLOT(addLog(bool)));
 
+    connect(m_pWasherButton, SIGNAL(toggled(bool)), this, SLOT(sendCommand(bool)));
+    connect(m_pWiperButton, SIGNAL(toggled(bool)), this, SLOT(sendCommand(bool)));
+
     connect(m_pDeleteLogsButton, SIGNAL(clicked()), m_pListOfLogs, SLOT(clear()));
+
 }
 
 void MainWidget::addLog(bool bButtonStatus)
@@ -53,4 +60,23 @@ void MainWidget::addLog(bool bButtonStatus)
         m_pListOfLogs->setTextColor(QColor(0,0,255));
 
     m_pListOfLogs->append(pSender->text() + ((bButtonStatus)? " on" : " off") );
+}
+
+void MainWidget::sendCommand(bool bButtonStatus)
+{
+    QPushButton* pSender = (QPushButton*)sender();
+    if (pSender == m_pWasherButton)
+    {
+        if (bButtonStatus)
+            m_pCommandSender->addCommand(CommandSender::e_first_relay_open);
+        else
+            m_pCommandSender->addCommand(CommandSender::e_first_relay_close);
+    }
+    else if (pSender == m_pWiperButton)
+    {
+        if (bButtonStatus)
+            m_pCommandSender->addCommand(CommandSender::e_second_relay_open);
+        else
+            m_pCommandSender->addCommand(CommandSender::e_second_relay_close);
+    }
 }
